@@ -1,7 +1,0 @@
-# Generated file for namespace trackmate
-# Date 2020-09-20T15:35:33+01:00
-resources:
-  - lzuccarelli-role-binding.yaml
-  - hkanuri-role-binding.yaml
-  - rborys-role-binding.yaml
-  - crommel-role-binding.yaml
