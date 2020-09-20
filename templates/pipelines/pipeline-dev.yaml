@@ -1,0 +1,133 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: docker-pipeline-dev
+spec:
+  params:
+    - name: GIT_REVISION
+      type: string
+      description: The git repository revision to check out
+      default: master
+    - name: GIT_URL
+      type: string
+      description: The git reposotiry to check out
+      default: {{ .Repos.Cicd }}
+    - name: GIT_AUTHOR_NAME
+      type: string
+      description: The git repository revision authors name
+    - name: GIT_AUTHOR_EMAIL
+      type: string
+      description: The git repository revision authors email
+    - name: IMAGE_TAG
+      type: string
+      description: Full image path and tag
+      default: {{ .RegistryUrl }}/{{ .Project }}-{{ .Application }}:latest
+  resources:
+    - name: git-repo
+      type: git
+    - name: image-quay
+      type: image
+    - name: git-infra-repo
+      type: git
+
+  workspaces:
+    - name: shared-workspace
+    - name: sonar-settings
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+        kind: ClusterTask 
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.GIT_URL)
+        - name: deleteExisting
+          value: "true"
+        - name: revision
+          value: $(params.GIT_REVISION)
+    - name: code-analysis
+      taskRef:
+        name: sonarqube-scanner
+        kind: ClusterTask
+      runAfter:
+        - fetch-repository
+      params:
+        - name: SONAR_HOST_URL
+          value: {{ SonarqubeUrl }}
+        - name: SONAR_PROJECT_KEY
+          value: poc-tekton
+      workspaces:
+        - name: source-dir
+          workspace: shared-workspace
+        - name: sonar-settings
+          workspace: sonar-settings
+    - name: build-image
+      taskRef:
+        name: buildah
+        kind: ClusterTask
+      runAfter:
+        - code-analysis
+      resources:
+        inputs:
+        - name: source
+          resource: git-repo
+        outputs:
+        - name: image
+          resource: image-quay
+      params:
+      - name: DOCKERFILE
+        value: "build.Dockerfile"
+    - name: deploy
+      taskRef:
+        name: {{ .Application }}-patch-image
+        kind: Task
+      runAfter:
+        - build-image
+      resources:
+        inputs:
+        - name: git-source
+          resource: git-infra-repo
+      params:
+      - name: IMAGE_TAG
+        value: $(params.IMAGE_TAG)
+      - name: GIT_REVISION
+        value: $(params.GIT_REVISION)
+      - name: GIT_AUTHOR_NAME
+        value: $(params.GIT_AUTHOR_NAME)
+      - name: GIT_AUTHOR_EMAIL
+        value: $(params.GIT_AUTHOR_EMAIL)
+      - name: MANIFEST_FILE
+        value: environments/overlays/dev/patches/patch-{{ .Application }}-image.yaml
+      - name: CONTAINER_NAME
+        value: {{ .Application }}
+    - name: slack-notify
+      taskRef:
+        name: send-to-webhook-slack
+        kind: ClusterTask
+      runAfter:
+        - deploy
+      params:
+        - name: webhook-secret
+          value: {{ Project }}-notify-slack-webhook-secret
+        - name: message
+          value: "{{ .Application }}-pipeline-dev pipeline completed for $(params.GIT_REVISION)"
+    - name: email-notify
+      taskRef:
+        name: sendmail
+        kind: ClusterTask
+      runAfter:
+        - deploy
+      params:
+        - name: server
+          value: {{ .Project }}-smtp-auth
+        - name: subject
+          value: "{{ .Application }}-pipeline-dev pipeline completed for $(params.GIT_REVISION)"
+        - name: body
+          value: "{{ .Application }}-pipeline-dev pipeline completed for $(params.GIT_REVISION)"
+        - name: sender
+          value: "{{ .SmptSender }}"
+        - name: recipients
+          value: "{{ .SmptRecipient }}"

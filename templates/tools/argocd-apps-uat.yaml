@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  #name of the argocd app
+  name: {{ .Project }}-uat
+  #apps always in argocd namespace for operator
+  namespace: devops-argo
+  labels:
+    COST-TENANCY: Dedicated
+    ORG: {{ .Organization }}
+    DEPT: DEVOPS
+spec:
+  destination:
+    #namespace to place the app
+    namespace: {{ .Organization }}-{{ .Project }}-uat
+    #cluster to install the app into
+    server: 'https://kubernetes.default.svc'
+  #the argocd appproject to put this app into
+  project: {{ .Project }}
+  source:
+    #path to source in the repo
+    path: environments/overlays/uat
+    #repo url
+    repoURL: 'ssh://git@code.{{ .Organization }}.us:7999/cicd/{{ .Project }}.git'
+    targetRevision: HEAD
+  syncPolicy:
+    automated: {}

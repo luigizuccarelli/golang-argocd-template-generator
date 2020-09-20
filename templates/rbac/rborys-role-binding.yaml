@@ -1,0 +1,14 @@
+# Generated file for namespace {{ .Project }}
+# Date {{ .Time }}
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: rborys-edit
+subjects:
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: rborys
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit

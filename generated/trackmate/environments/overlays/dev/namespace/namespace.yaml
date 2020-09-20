@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: 14west-trackmate-dev
+  labels:
+    cost-tenancy: Dedicated
+    dept: Development
+    org: DevOps
+    network-share: devops-trackmate

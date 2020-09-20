@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: trackmate-uat-promote-
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    #comment this out if you want to leave the job/pod that is created for troubleshooting
+    #argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      serviceAccountName: trackmate-sa
+      initContainers:
+      - name: trackmate-rollout-status
+        image: robermar2/ultra-cli:latest
+        command:
+          - /bin/sh
+          - -c
+          - |
+            oc rollout status deploymentconfig/message-consumer-dc -n 

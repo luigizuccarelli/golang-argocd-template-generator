@@ -1,0 +1,12 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: trigger-route-uat
+spec:
+  port:
+    targetPort: http-listener
+  to:
+    kind: Service
+    name: el-{{ .Project }}-event-listener-uat
+  tls:
+    termination: edge

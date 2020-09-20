@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Project }}-dev-fail-sync-
+  annotations:
+    argocd.argoproj.io/hook: SyncFail
+    #comment this out if you want to leave the job/pod that is created for troubleshooting
+    #argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ .Project }}-sa
+      containers:
+      - name: slack-notification
+        image: curlimages/curl
+        command:
+          - "curl"
+          - "-X"
+          - "POST"
+          - "--data-urlencode"
+          - "payload={\"channel\": \"{{ .Slack.Channel }}", \"text\": \"{{ .Project }} app sync Failed!\"}"
+          - "{{ .Slack.Url }}"
+      restartPolicy: Never
+  backoffLimit: 2

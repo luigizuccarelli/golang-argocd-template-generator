@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: git-infra-http
+spec:
+  params:
+    - name: url
+      value: 'https://code.14west.us/scm/cicd/lmz-test.git'
+    - name: revision
+      value: HEAD
+  type: git

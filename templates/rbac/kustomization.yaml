@@ -1,0 +1,7 @@
+# Generated file for namespace {{ .Project }}
+# Date {{ .Time }}
+resources:
+  - lzuccarelli-role-binding.yaml
+  - hkanuri-role-binding.yaml
+  - rborys-role-binding.yaml
+  - crommel-role-binding.yaml

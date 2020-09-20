@@ -1,0 +1,61 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: trigger-template-uat
+  annotations:
+        # don't show up to prune as it is auto generated
+        argocd.argoproj.io/sync-options: Prune=false
+spec:
+  params:
+  - name: git-repo-url
+    description: The git repository url
+  - name: git-revision
+    description: The git revision
+    default: master
+  - name: git-repo-name
+    description: The git repo name
+
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1alpha1
+    kind: PipelineResource
+    metadata:
+      name: $(params.git-repo-name)-git-repo-$(uid)
+      annotations:
+        # don't show up to prune as it is auto generated
+        argocd.argoproj.io/sync-options: Prune=false
+    spec:
+      type: git
+      params:
+      - name: revision
+        value: $(params.git-revision)
+      - name: url
+        value: $(params.git-repo-url)
+
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      name: {{ .Project }}-uat-$(params.git-repo-name)-$(uid)
+      annotations:
+        # don't show up to prune as it is auto generated
+        argocd.argoproj.io/sync-options: Prune=false
+    spec:
+      serviceAccountName: {{ .Project }}-pipeline
+      pipelineRef:
+        name: {{ .Project }}-pipeline-uat
+      params:
+        - name: GIT_REVISION
+          value: $(params.git-revision)
+        - name: GIT_URL
+          value: $(params.git-repo-url)
+      resources:
+        - name: git-infra-repo
+          resourceRef:
+            name: {{ .Project }}-git-infra-http
+      podTemplate:
+        nodeSelector:
+          node-role.kubernetes.io/cicd: ''
+      workspaces:
+        - name: shared-workspace
+          persistentVolumeClaim:
+            claimName: {{ .Project }}-pipeline-pvc
+ 
