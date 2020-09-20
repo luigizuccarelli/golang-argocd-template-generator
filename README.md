@@ -4,7 +4,7 @@
 
 This tool will generate all the necessary yaml files and folders for a project with multiple microservices.
 
-It is meant to do the basic scaffolding and inject the releviant data as needed. 
+It is meant to do the basic scaffolding and inject the relevant data as needed. 
 
 The are a couple of caveats
 
