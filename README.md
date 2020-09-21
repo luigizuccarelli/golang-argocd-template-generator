@@ -273,7 +273,19 @@ Execute the following command once you have built the executable
 
 All the templates will be generated in the **generated** folder
 
-Remember to update envars in the folder **generated/environments/overlays/[dev,uat,prd]** directories
+## Customization
+
+**NB**
+
+You can change any *generated* file as you see fit. As mentioned before if you re-generate all changes will be lost. So backup changes before re-genrating
+
+### Basic customization
+
+The main files to customize will be
+
+- ./generated/<project>/manifests/tekton/pipelines/<application>/base/pipeline-dev.yaml (pipeline flow, programming language base image etc)
+
+- ./generated/environments/overlays/[dev,uat,prod]/patches/patch-<application>-env.yaml (environment varaibles)
 
 
 
