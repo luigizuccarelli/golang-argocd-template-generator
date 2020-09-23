@@ -146,28 +146,53 @@ Create a simple json file (config.json) - see the format below
 
 ```json
 {
-  "project": "lmz-test",
+  "organization":"",
+  "project": "",
   "repos" : {
-    "project":"https://code.14west.us/scm/threefold/lmz-test.git",
-    "cicd":"https://code.14west.us/scm/cicd/lmz-test.git"
+    "project":"git-repo",
+    "cicd":"git-repo",
+    "gitbase":"",
+    "user":"",
+    "pwd":""
   },
+  "secrets" : {
+    "imagepull":""
+  },
+  "slack": {
+    "url":"",
+    "channel":""
+  },
+  "smtp" : {
+    "sender":"",
+    "recipient":"",
+    "url": "",
+    "port": "",
+    "user": "",
+    "password": "",
+    "tls": ""
+  },
+  "registryurl":"",
+  "sonarqubeurl":"",
+  "productionurl":"",
   "items": 
     [
       {
-        "repo":"https://code.14west.us/scm/threefold/test-one.git",
-        "application":"test-one"
+        "repo":"",
+        "application":"",
+        "triggerurl":""
       },
       {
-        "repo":"https://code.14west.us/scm/threefold/test-two.git",
-        "application":"test-two"
+        "repo":"git-repo",
+        "application":"",
+        "triggerurl":""
       },
       {
-        "repo":"https://code.14west.us/scm/threefold/test-three.git",
-        "application":"test-three"
+        "repo":"",
+        "application":"",
+        "triggerurl":""
       }
     ]
-}
-```
+}```
 
 So basically we are setting up the project name, defining the high level repo's, 
 and telling the generator what microservices will be deployed in this app
