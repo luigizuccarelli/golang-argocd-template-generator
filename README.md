@@ -302,7 +302,7 @@ All the templates will be generated in the **generated** folder
 
 **NB**
 
-You can change any *generated* file as you see fit. As mentioned before if you re-generate all changes will be lost. So backup changes before re-genrating
+You can change any *generated* file as you see fit. As mentioned before if you re-generate all changes will be lost. So backup changes before re-generating
 
 ### Basic customization
 
@@ -310,7 +310,7 @@ The main files to customize will be
 
 - ./generated/<project>/manifests/tekton/pipelines/<application>/base/pipeline-dev.yaml (pipeline flow, programming language base image etc)
 
-- ./generated/environments/overlays/[dev,uat,prod]/patches/patch-<application>-env.yaml (environment varaibles)
+- ./generated/environments/overlays/[dev,uat,prod]/patches/patch-<application>-env.yaml (environment variables)
 
 
 
