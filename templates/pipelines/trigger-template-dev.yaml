@@ -37,7 +37,7 @@ spec:
       type: image
       params:
       - name: url
-        value: {{ RegistryUrl }}/{{ .Project }}:$(params.git-revision)
+        value: {{ .RegistryUrl }}/{{ .Project }}:$(params.git-revision)
 
   - apiVersion: tekton.dev/v1beta1
     kind: PipelineRun

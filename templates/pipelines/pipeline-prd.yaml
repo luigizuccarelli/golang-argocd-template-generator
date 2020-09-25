@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: {{ Application }}-pipeline-prd
+  name: {{ .Application }}-pipeline-prd
 spec:
   params:
     - name: GIT_REVISION
@@ -11,7 +11,7 @@ spec:
     - name: GIT_URL
       type: string
       description: The git repository to check out
-      default: {{ .Repos.Cicd }}
+      default: {{ .Cicd }}
   resources:
     - name: git-infra-repo
       type: git
@@ -35,7 +35,7 @@ spec:
           value: $(params.GIT_REVISION)
     - name: deploy
       taskRef:
-        name: {{ .Application }]-promote-image
+        name: {{ .Application }}-promote-image
         kind: Task
       runAfter:
         - fetch-repository

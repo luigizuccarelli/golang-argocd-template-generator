@@ -32,6 +32,7 @@ import (
 var (
 	config      string
 	stepsConfig string
+	loglevel    string
 )
 
 type GenerateSchema struct {
@@ -52,10 +53,17 @@ type GenerateSchema struct {
 }
 
 type AppDetails struct {
-	Project     string
-	Application string
-	Repo        string
-	Env         string
+	Project       string
+	Application   string
+	Organization  string
+	Repo          string
+	Cicd          string
+	RegistryUrl   string
+	TriggerUrl    string
+	SonarqubeUrl  string
+	Env           string
+	SmtpRecipient string
+	SmtpSender    string
 }
 
 type RepoDetails struct {
@@ -98,7 +106,7 @@ func makeDirs(schema *GenerateSchema) {
 	os.RemoveAll("./generated/")
 
 	// if the structure changes - we can update this inline
-	list := `generated/{{ .Project }}/environments/overlays/cicd,generated/{{ .Project }}/environments/overlays/dev/argo,generated/{{ .Project }}/environments/overlays/dev/namespace,generated/{{ .Project }}/environments/overlays/dev/patches,generated/{{ .Project }}/environments/overlays/uat/argo,generated/{{ .Project }}/environments/overlays/uat/namespace,generated/{{ .Project }}/environments/overlays/uat/patches,generated/{{ .Project }}/environments/overlays/prd/argo,generated/{{ .Project }}/environments/overlays/prd/namespace,generated/{{ .Project }}/environments/overlays/prd/patches,generated/{{ .Project }}/environments/overlays/tools,{{range .Items}}generated/{{ .Project }}/manifests/apps/{{ .Application }}/base,{{end}}generated/{{ .Project }}/manifests/apps/namspace-cicd/base,generated/{{ .Project }}/manifests/apps/rbac/base,{{range .Items}}generated/{{ .Project }}/manifests/tekton/pipelines/{{ .Application }}/base,{{end}}generated/{{ .Project }}/manifests/tekton/resources/base,generated/{{ .Project }}/manifests/tekton/task/base,generated/{{ .Project }}/manifests/tekton/tools/base`
+	list := `generated/{{ .Project }}/environments/overlays/cicd,generated/{{ .Project }}/environments/overlays/dev/argo,generated/{{ .Project }}/environments/overlays/dev/namespace,generated/{{ .Project }}/environments/overlays/dev/patches,generated/{{ .Project }}/environments/overlays/uat/argo,generated/{{ .Project }}/environments/overlays/uat/namespace,generated/{{ .Project }}/environments/overlays/uat/patches,generated/{{ .Project }}/environments/overlays/prd/argo,generated/{{ .Project }}/environments/overlays/prd/namespace,generated/{{ .Project }}/environments/overlays/prd/patches,generated/{{ .Project }}/environments/overlays/tools,{{range .Items}}generated/{{ .Project }}/manifests/apps/{{ .Application }}/base,{{end}}generated/{{ .Project }}/manifests/apps/namespace-cicd/base,generated/{{ .Project }}/manifests/apps/rbac/base,{{range .Items}}generated/{{ .Project }}/manifests/tekton/pipelines/{{ .Application }}/base,{{end}}generated/{{ .Project }}/manifests/tekton/resources/base,generated/{{ .Project }}/manifests/tekton/task/base,generated/{{ .Project }}/manifests/tekton/tools/base`
 
 	//parse some content and generate a template
 	tmpl := template.New("makedirs")
@@ -198,13 +206,21 @@ func injectData(schema *GenerateSchema, env string) *GenerateSchema {
 	for x, _ := range schema.Items {
 		schema.Logger.Debug(fmt.Sprintf("Application  %s", schema.Items[x].Application))
 		schema.Logger.Debug(fmt.Sprintf("Repo  %s", schema.Items[x].Repo))
+		schema.Logger.Debug(fmt.Sprintf("TriggerUrl  %s", schema.Items[x].TriggerUrl))
+		schema.Items[x].Organization = schema.Organization
 		schema.Items[x].Project = schema.Project
 		schema.Items[x].Env = env
+		schema.Items[x].Cicd = schema.Repos.Cicd
+		schema.Items[x].RegistryUrl = schema.RegistryUrl
+		schema.Items[x].SonarqubeUrl = schema.SonarqubeUrl
+		schema.Items[x].SmtpRecipient = schema.Smtp.Recipient
+		schema.Items[x].SmtpSender = schema.Smtp.Sender
 	}
 	return schema
 }
 
 func init() {
+	flag.StringVar(&loglevel, "l", "info", "Set log level [info,debug,trace]")
 	flag.StringVar(&config, "c", "", "Use config file")
 	flag.StringVar(&stepsConfig, "s", "", "Use steps file")
 }
@@ -220,7 +236,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger := &simple.Logger{Level: "info"}
+	logger := &simple.Logger{Level: loglevel}
 	data, err := ioutil.ReadFile("config.json")
 	if err != nil {
 		logger.Error(fmt.Sprintf("Reading config.json  %v", err))
@@ -353,11 +369,13 @@ func main() {
 		case "cicd":
 			schema.Path = "./generated/" + schema.Project + "/manifests/apps/namespace-cicd/base"
 			schema.ReadPath = "templates/namespace-cicd"
+			err = parseFiles(schema)
 			break
 		case "apps":
-			schema.Path = "./generated/" + schema.Project + "/manifests/apps/"
+			schema.Path = "./generated/" + schema.Project + "/manifests/apps"
 			schema.ReadPath = "templates/app"
-			err = parseFiles(schema)
+			ns := injectData(schema, "dev")
+			err = generateApps(ns)
 			break
 		case "rbac":
 			schema.Path = "./generated/" + schema.Project + "/manifests/apps/rbac/base"
@@ -379,10 +397,18 @@ func main() {
 			schema.ReadPath = "templates/resources"
 			err = parseFiles(schema)
 			break
+		case "pipelines":
+			schema.Path = "./generated/" + schema.Project + "/manifests/tekton/pipelines"
+			schema.ReadPath = "templates/pipelines"
+			ns := injectData(schema, "dev")
+			err = generateApps(ns)
+			break
+
 		}
 
 		if err != nil {
 			logger.Error(fmt.Sprintf("Parsing files for : %s ", step.Name))
+			logger.Error(fmt.Sprintf("Error details  : %v ", err))
 			os.Exit(1)
 		}
 	}

@@ -18,7 +18,7 @@ spec:
           - "-X"
           - "POST"
           - "--data-urlencode"
-          - "payload={\"channel\": \"{{ .Slack.Channel }}", \"text\": \"{{ .Project }} app sync Failed!\"}"
+          - "payload={\"channel\": \"{{ .Slack.Channel }}\", \"text\": \"{{ .Project }} app sync Failed!\"}"
           - "{{ .Slack.Url }}"
       restartPolicy: Never
   backoffLimit: 2

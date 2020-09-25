@@ -292,7 +292,7 @@ env GOOS=linux GOARCH=amd64 go build -o /build/generate
 Execute the following command once you have built the executable
 
 ```bash
-./build/generate -c config.json -s steps.json
+./build/generate -c config.json -s steps.json -l debug
 
 ```
 

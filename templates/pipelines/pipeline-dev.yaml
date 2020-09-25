@@ -11,7 +11,7 @@ spec:
     - name: GIT_URL
       type: string
       description: The git reposotiry to check out
-      default: {{ .Repos.Cicd }}
+      default: {{ .Cicd }}
     - name: GIT_AUTHOR_NAME
       type: string
       description: The git repository revision authors name
@@ -56,7 +56,7 @@ spec:
         - fetch-repository
       params:
         - name: SONAR_HOST_URL
-          value: {{ SonarqubeUrl }}
+          value: {{ .SonarqubeUrl }}
         - name: SONAR_PROJECT_KEY
           value: poc-tekton
       workspaces:
@@ -111,7 +111,7 @@ spec:
         - deploy
       params:
         - name: webhook-secret
-          value: {{ Project }}-notify-slack-webhook-secret
+          value: {{ .Project }}-notify-slack-webhook-secret
         - name: message
           value: "{{ .Application }}-pipeline-dev pipeline completed for $(params.GIT_REVISION)"
     - name: email-notify
@@ -128,6 +128,6 @@ spec:
         - name: body
           value: "{{ .Application }}-pipeline-dev pipeline completed for $(params.GIT_REVISION)"
         - name: sender
-          value: "{{ .SmptSender }}"
+          value: "{{ .SmtpSender }}"
         - name: recipients
-          value: "{{ .SmptRecipient }}"
+          value: "{{ .SmtpRecipient }}"

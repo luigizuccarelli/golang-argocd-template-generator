@@ -35,6 +35,6 @@ spec:
           - /bin/sh
           - -c
           - |{{ range .Items}}
-            curl -H "Content-Type: application/json" -X POST --data '{"repositoryUrl": "{{ .Repos.Project }}", "repositoryName": "{{ .Application }}", "revision": "HEAD"}' {{ .TriggerUrl }}{{ end }}      
+            curl -H "Content-Type: application/json" -X POST --data '{"repositoryUrl": "{{ .Repo }}", "repositoryName": "{{ .Application }}", "revision": "HEAD"}' {{ .TriggerUrl }}{{ end }}      
 restartPolicy: Never
   backoffLimit: 2
