@@ -271,6 +271,9 @@ Use the steps.json file as is (you can create your own but leave this file intac
       },
       {
         "name":"resources"
+      },
+      {
+        "name":"pipelines"
       }
     ]
 }
