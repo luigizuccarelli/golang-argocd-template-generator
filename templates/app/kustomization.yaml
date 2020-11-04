@@ -1,4 +1,4 @@
-namePrefix: {{ .Application }}-
+namePrefix: 
 commonLabels:
   app: {{ .Application }}
 resources:
@@ -6,4 +6,4 @@ resources:
   - service-account.yaml
   - deployment-config.yaml
   - service.yaml
-  - route.yaml
+

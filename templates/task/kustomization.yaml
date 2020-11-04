@@ -1,7 +1,0 @@
-namePrefix: {{ .Project }}-
-commonLabels:
-  app: {{ .Project }}
-resources:
-  - patch-image.yaml
-  - promote-image.yaml
-  - veracode-scanner.yaml

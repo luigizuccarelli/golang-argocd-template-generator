@@ -30,10 +30,6 @@ The folder structure is as follows :
                 |               |
                 |               --- dev
                 |               |     |
-                |               |     --- argo
-                |               |     |     |
-                |               |     |     --- post-sync-fail.yaml
-                |               |     |         post-sync-promote.yaml
                 |               |     |
                 |               |     --- namespace
                 |               |     |     |
@@ -42,19 +38,11 @@ The folder structure is as follows :
                 |               |     |         resource-quota.yaml
                 |               |     |         servis-account-role-binding.yaml
                 |               |     |
-                |               |     --- patches
-                |               |     |     |
-                |               |     |     --- list of patch files (for each microservice)
-                |               |     |
                 |               |     --- kustermization.yaml
                 |               |
                 |               --- uat (same structure as dev)
                 |               |
                 |               --- prd (same structure as dev)
-                |               |
-                |               --- tools
-                |                     |
-                |                     --- kustermization.yaml
                 |
                 --- manifests
                       |
@@ -64,7 +52,7 @@ The folder structure is as follows :
                       |     |         |
                       |     |         --- base
                       |     |               |
-                      |     |               --- deployment-config.yaml
+                      |     |               --- deployment.yaml
                       |     |                   image-pull-secret.yaml
                       |     |                   route.yaml
                       |     |                   service.yaml
@@ -142,57 +130,7 @@ The folder structure is as follows :
 
 ### Config
 
-Create a simple json file (config.json) - see the format below
-
-```json
-{
-  "organization":"",
-  "project": "",
-  "repos" : {
-    "project":"git-repo",
-    "cicd":"git-repo",
-    "gitbase":"",
-    "user":"",
-    "pwd":""
-  },
-  "secrets" : {
-    "imagepull":""
-  },
-  "slack": {
-    "url":"",
-    "channel":""
-  },
-  "smtp" : {
-    "sender":"",
-    "recipient":"",
-    "url": "",
-    "port": "",
-    "user": "",
-    "password": "",
-    "tls": ""
-  },
-  "registryurl":"",
-  "sonarqubeurl":"",
-  "productionurl":"",
-  "items": 
-    [
-      {
-        "repo":"",
-        "application":"",
-        "triggerurl":""
-      },
-      {
-        "repo":"git-repo",
-        "application":"",
-        "triggerurl":""
-      },
-      {
-        "repo":"",
-        "application":"",
-        "triggerurl":""
-      }
-    ]
-}```
+Create a simple json file (config.json) - see the example-config.json file in this repo
 
 So basically we are setting up the project name, defining the high level repo's, 
 and telling the generator what microservices will be deployed in this app
@@ -205,79 +143,7 @@ in the genertated folder will be lots - so maybe keep a copy (backup) before re-
 
 ## Steps Config
 
-Use the steps.json file as is (you can create your own but leave this file intact its used to generate all yaml objects)
-
-```json
-{
-  "project": "trackmate",
-  "items":
-    [
-      {
-        "name":"mkdirs"
-      },
-      {
-        "name":"environments-cicd"
-      },
-      {
-        "name":"environments-tools"
-      },
-      {
-        "name":"environments-dev"
-      },
-      {
-        "name":"environments-dev-argo"
-      },
-      {
-        "name":"environments-dev-namespace"
-      },
-      {
-        "name":"environments-dev-patches"
-      },
-      {
-        "name":"environments-uat"
-      },
-      {
-        "name":"environments-uat-argo"
-      },
-      {
-        "name":"environments-uat-namespace"
-      },
-      {
-        "name":"environments-uat-patches"
-      },
-      {
-        "name":"environments-prd"
-      },
-      {
-        "name":"environments-prd-argo"
-      },
-      {
-        "name":"environments-prd-namespace"
-      },
-      {
-        "name":"environments-prd-patches"
-      },
-      {
-        "name":"cicd"
-      },
-      {
-        "name":"apps"
-      },
-      {
-        "name":"rbac"
-      },
-      {
-        "name":"tools"
-      },
-      {
-        "name":"resources"
-      },
-      {
-        "name":"pipelines"
-      }
-    ]
-}
-```
+Use the example-steps.json file as is (you can create your own but leave this file intact its used to generate all yaml objects)
 
 ## Build  
 Execute the following command in the directory where you have cloned this project
@@ -313,7 +179,15 @@ The main files to customize will be
 
 - ./generated/<project>/manifests/tekton/pipelines/<application>/base/pipeline-dev.yaml (pipeline flow, programming language base image etc)
 
-- ./generated/environments/overlays/[dev,uat,prod]/patches/patch-<application>-env.yaml (environment variables)
+There is another utility called merge-yaml.go, the generator will create a directory called current/<app> (for each app)
+Copy any current deployment yaml files that you have i,e 
+
+```bash
+oc get deployment xyz -o yaml > current<app-name>/deployment.yaml
+```
+
+The merge function will take what is in the folder (current) and iterate through each yaml file and merge it with the generated deploy.yaml
+
 
 
 

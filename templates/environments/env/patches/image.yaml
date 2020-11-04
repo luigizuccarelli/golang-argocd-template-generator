@@ -1,3 +1,0 @@
-- op: replace
-  path: "/spec/template/spec/containers/0/image"
-  value: {{ .RegistryUrl }}/{{ .Project}}-{{ .Application }}:2f3eaae5c041bfdc1da4b4b0afe62b084d7f39d5

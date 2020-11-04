@@ -1,48 +1,19 @@
 {
-  "organization":"",
-  "project": "",
-  "repos" : {
-    "project":"git-repo",
-    "cicd":"git-repo",
-    "gitbase":"",
-    "user":"",
-    "pwd":""
-  },
-  "secrets" : {
-    "imagepull":""
-  },
-  "slack": {
-    "url":"",
-    "channel":""
-  },
-  "smtp" : {
-    "sender":"",
-    "recipient":"",
-    "url": "",
-    "port": "",
-    "user": "",
-    "password": "",
-    "tls": ""
-  },
-  "registryurl":"",
-  "sonarqubeurl":"",
-  "productionurl":"",
+  "organization":"org",
+  "project": "project",
+  "namespace": "project-namespace",
+  "imagesecret": "extra strong secrer",
   "items": 
     [
       {
-        "repo":"",
-        "application":"",
-        "triggerurl":""
-      },
-      {
-        "repo":"git-repo",
-        "application":"",
-        "triggerurl":""
+        "repo":"http://repo.com",
+        "application":"app-1",
+        "port":"1234"
       },
       {
         "repo":"",
-        "application":"",
-        "triggerurl":""
-      }
+        "application":"app-2",
+        "port":"9000"
+      } 
     ]
 }

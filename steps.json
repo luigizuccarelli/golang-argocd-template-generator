@@ -1,70 +1,42 @@
 {
-  "project": "trackmate",
+  "project": "myportfolio",
   "items":
     [
       {
-        "name":"mkdirs"
+        "name":"mkdirs",
+        "skip": false
       },
       {
-        "name":"environments-cicd"
+        "name":"environments-dev",
+        "skip": false
       },
       {
-        "name":"environments-tools"
+        "name":"environments-dev-namespace",
+        "skip": false
       },
       {
-        "name":"environments-dev"
+        "name":"environments-uat",
+        "skip": false
       },
       {
-        "name":"environments-dev-argo"
+        "name":"environments-uat-namespace",
+        "skip": false
       },
       {
-        "name":"environments-dev-namespace"
+        "name":"environments-prd",
+        "skip": false
       },
       {
-        "name":"environments-dev-patches"
+        "name":"environments-prd-namespace",
+        "skip": false
       },
       {
-        "name":"environments-uat"
+        "name":"apps",
+        "skip": false
       },
       {
-        "name":"environments-uat-argo"
-      },
-      {
-        "name":"environments-uat-namespace"
-      },
-      {
-        "name":"environments-uat-patches"
-      },
-      {
-        "name":"environments-prd"
-      },
-      {
-        "name":"environments-prd-argo"
-      },
-      {
-        "name":"environments-prd-namespace"
-      },
-      {
-        "name":"environments-prd-patches"
-      },
-      {
-        "name":"cicd"
-      },
-      {
-        "name":"apps"
-      },
-      {
-        "name":"rbac"
-      },
-      {
-        "name":"tools"
-      },
-      {
-        "name":"resources"
-      },
-      {
-        "name":"pipelines"
+        "name":"rbac",
+        "skip": false
       }
-
     ]
 }
