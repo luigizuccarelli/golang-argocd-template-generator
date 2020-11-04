@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: {{ .Application }}
+  namepace: {{ .Namespace }}
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels:  
+      app.kubernetes.io: {{ .Application }}
+  template: 
+    metadata: 
+      labels: 
+        app.kubernetes.io: {{ .Application }}
+    spec:
+      serviceAccountName: {{ .Application }}-sa
+      containers: 
+        - 
+          env: 
+            - name: SERVER_PORT
+              value: "{{ .Port }}"
+          image: quay.io/14west/{{ .Application }}:dev
+          livenessProbe: 
+            failureThreshold: 2
+            httpGet: 
+              path: /api/v2/sys/info/isalive
+              port: {{ .Port }}
+              scheme: HTTP
+            initialDelaySeconds: 55
+            periodSeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: {{ .Application }}
+          ports:
+            - containerPort: {{ .Port }}
+              protocol: TCP
+          readinessProbe: 
+            failureThreshold: 1
+            httpGet: 
+              path: /api/v2/sys/info/isalive
+              port: {{ .Port }}
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources: 
+            limits: 
+              cpu: 100m
+              memory: 100Mi
+            requests: 
+              cpu: 100m
+              memory: 100Mi      
+

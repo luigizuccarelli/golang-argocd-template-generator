@@ -1,0 +1,42 @@
+{
+  "project": "project",
+  "items":
+    [
+      {
+        "name":"mkdirs",
+        "skip": false
+      },
+      {
+        "name":"environments-dev",
+        "skip": false
+      },
+      {
+        "name":"environments-dev-namespace",
+        "skip": false
+      },
+      {
+        "name":"environments-uat",
+        "skip": false
+      },
+      {
+        "name":"environments-uat-namespace",
+        "skip": false
+      },
+      {
+        "name":"environments-prd",
+        "skip": false
+      },
+      {
+        "name":"environments-prd-namespace",
+        "skip": false
+      },
+      {
+        "name":"apps",
+        "skip": false
+      },
+      {
+        "name":"rbac",
+        "skip": false
+      }
+    ]
+}
