@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ .Project }}-{{ .Env }}
+  name: {{ .Namespace }}-{{ .Env }}
   labels:
     cost-tenancy: Dedicated
     dept: Development

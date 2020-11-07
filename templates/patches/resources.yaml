@@ -1,0 +1,9 @@
+- op: add
+  path: "/spec/template/spec/containers/0/resources"
+  value:
+      limits:
+        cpu: {{ .Cpu }}
+        memory: {{ .Mem }}
+      requests:
+        cpu: {{ .Cpu }}
+        memory: {{ .Mem }}

@@ -43,14 +43,19 @@ type GenerateSchema struct {
 	ReadPath  string
 	Env       string
 	Time      string
+	Version   string
 	Logger    *simple.Logger
 }
 
 type AppDetails struct {
 	Application string
 	Namespace   string
+	Version     string
 	Port        string
 	Repo        string
+	Replicas    string
+	Mem         string
+	Cpu         string
 	Env         string
 }
 
@@ -68,7 +73,7 @@ func makeDirs(schema *GenerateSchema) {
 	os.RemoveAll("./generated/")
 
 	// if the structure changes - we can update this inline
-	list := `generated/{{ .Project }}/environments/overlays/dev,generated/{{ .Project }}/environments/overlays/dev/namespace,generated/{{ .Project }}/environments/overlays/uat,generated/{{ .Project }}/environments/overlays/uat/namespace,generated/{{ .Project }}/environments/overlays/prd,generated/{{ .Project }}/environments/overlays/prd/namespace`
+	list := `generated/{{ .Project }}/environments/overlays/dev,generated/{{ .Project }}/environments/overlays/dev/namespace,generated/{{ .Project }}/environments/overlays/dev/patches,generated/{{ .Project }}/environments/overlays/uat,generated/{{ .Project }}/environments/overlays/uat/namespace,generated/{{ .Project }}/environments/overlays/uat/patches,generated/{{ .Project }}/environments/overlays/prd,generated/{{ .Project }}/environments/overlays/prd/namespace,generated/{{ .Project }}/environments/overlays/prd/patches`
 
 	//parse some content and generate a template
 	tmpl := template.New("makedirs")
@@ -88,62 +93,66 @@ func makeDirs(schema *GenerateSchema) {
 		schema.Logger.Debug(fmt.Sprintf("Created directory : %s", d))
 	}
 
-	environments := "dev,prd,uat"
 	// generate the app dirs
-	for _, env := range strings.Split(environments, ",") {
-		for _, item := range schema.Items {
-			d := "generated/" + schema.Project + "/manifests/apps/" + env + "/" + item.Application + "/base"
-			e := os.MkdirAll(d, os.ModePerm)
-			if e != nil {
-				schema.Logger.Error(fmt.Sprintf("Creating directory : %s", d))
-				break
-			}
-			if _, err := os.Stat("current"); os.IsNotExist(err) {
-				d = "current/" + schema.Project + "/" + item.Application
-				e = os.MkdirAll(d, os.ModePerm)
-				if e != nil {
-					schema.Logger.Error(fmt.Sprintf("Creating directory : %s", d))
-					break
-				}
-			}
-			schema.Logger.Debug(fmt.Sprintf("Created app directory : %s", d))
-		}
-		// and lastly for rbac
-		d := "generated/" + schema.Project + "/manifests/apps/rbac/base"
+	for _, item := range schema.Items {
+		d := "generated/" + schema.Project + "/manifests/apps/" + item.Application + "/base"
 		e := os.MkdirAll(d, os.ModePerm)
 		if e != nil {
 			schema.Logger.Error(fmt.Sprintf("Creating directory : %s", d))
 			break
 		}
+		if _, err := os.Stat("current"); os.IsNotExist(err) {
+			d = "current/" + schema.Project + "/" + item.Application
+			e = os.MkdirAll(d, os.ModePerm)
+			if e != nil {
+				schema.Logger.Error(fmt.Sprintf("Creating directory : %s", d))
+				break
+			}
+		}
 		schema.Logger.Debug(fmt.Sprintf("Created app directory : %s", d))
 	}
+	// and lastly for rbac
+	d := "generated/" + schema.Project + "/manifests/apps/rbac/base"
+	e := os.MkdirAll(d, os.ModePerm)
+	if e != nil {
+		schema.Logger.Error(fmt.Sprintf("Creating directory : %s", d))
+		panic(e)
+	}
+	schema.Logger.Debug(fmt.Sprintf("Created app directory : %s", d))
 
 }
 
 // generateApps- utility function to parse and "generate" application yaml templates
-func generateApps(schema *GenerateSchema) error {
+func generateApps(mode string, schema *GenerateSchema) error {
 
 	files, err := ioutil.ReadDir("./" + schema.ReadPath)
 	if err != nil {
 		return err
 	}
-	environments := "dev,prd,uat"
 	for _, f := range files {
-		for _, env := range strings.Split(environments, ",") {
-			for x, _ := range schema.Items {
-				data, err := ioutil.ReadFile("./" + schema.ReadPath + "/" + f.Name())
+		for x, _ := range schema.Items {
+			data, err := ioutil.ReadFile("./" + schema.ReadPath + "/" + f.Name())
+			if err != nil {
+				return err
+			}
+			//parse some content and generate a template
+			var tpl bytes.Buffer
+			tmpl := template.New(schema.ReadPath)
+			tmp, er := tmpl.Parse(string(data))
+			if er != nil {
+				return er
+			}
+			tmp.Execute(&tpl, schema.Items[x])
+			if mode == "apps" {
+				path := schema.Path + "/" + schema.Items[x].Application + "/base/" + f.Name()
+				err = ioutil.WriteFile(path, tpl.Bytes(), 0755)
 				if err != nil {
 					return err
 				}
-				//parse some content and generate a template
-				var tpl bytes.Buffer
-				tmpl := template.New(schema.ReadPath)
-				tmp, er := tmpl.Parse(string(data))
-				if er != nil {
-					return er
-				}
-				tmp.Execute(&tpl, schema.Items[x])
-				path := schema.Path + "/" + env + "/" + schema.Items[x].Application + "/base/" + f.Name()
+				schema.Logger.Debug(fmt.Sprintf("Created template : %s", path))
+			}
+			if mode == "patches" {
+				path := schema.Path + "/patch-" + schema.Items[x].Application + "-" + f.Name()
 				err = ioutil.WriteFile(path, tpl.Bytes(), 0755)
 				if err != nil {
 					return err
@@ -316,7 +325,7 @@ func main() {
 			if !step.Skip {
 				schema.Path = "./generated/" + schema.Project + "/manifests/apps"
 				schema.ReadPath = "templates/app"
-				err = generateApps(schema)
+				err = generateApps("apps", schema)
 			}
 			break
 		case "rbac":
@@ -324,6 +333,20 @@ func main() {
 				schema.Path = "./generated/" + schema.Project + "/manifests/apps/rbac/base"
 				schema.ReadPath = "templates/rbac"
 				err = parseFiles(schema)
+			}
+			break
+		case "patches":
+			if !step.Skip {
+				us := injectData(schema, "all")
+				schema.Path = "./generated/" + schema.Project + "/environments/overlays/dev/patches"
+				schema.ReadPath = "templates/patches"
+				err = generateApps("patches", us)
+				schema.Path = "./generated/" + schema.Project + "/environments/overlays/uat/patches"
+				schema.ReadPath = "templates/patches"
+				err = generateApps("patches", us)
+				schema.Path = "./generated/" + schema.Project + "/environments/overlays/prd/patches"
+				schema.ReadPath = "templates/patches"
+				err = generateApps("patches", us)
 			}
 			break
 		}
@@ -334,9 +357,11 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	fmt.Println("")
 	logger.Info(fmt.Sprintf("All files can be found in the folder 'generated'"))
-	logger.Warn(fmt.Sprintf("To complete the process update each deployment.yaml in each environment (envars and image)"))
-	logger.Warn(fmt.Sprintf("There is another utility 'merge-yaml.go' that can be used to merge envars an image info yaml files"))
+	fmt.Println("")
+	logger.Warn(fmt.Sprintf("To complete the process copy your manually created patch-<application>-env.yaml files for each environment (dev,uat,prd) to the folders :"))
+	logger.Warn(fmt.Sprintf("generated/<projects>/environments/<env>/patches"))
 	logger.Warn(fmt.Sprintf("Also add in other resources (i.e secrets, configMaps etc and update the kustomization.yaml file)"))
 	logger.Warn(fmt.Sprintf("Finally push your changes to the argocd-repo"))
 	logger.Warn(fmt.Sprintf("Remember if you re-generate all changes will be lost. It's recommended to backup your changes"))

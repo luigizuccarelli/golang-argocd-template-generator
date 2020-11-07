@@ -10,3 +10,32 @@ resources:
   - namespace/limit-range.yaml
   - namespace/resource-quota.yaml
   - namespace/service-account-role-binding.yaml
+
+patchesJson6902:
+  # patches
+  {{range .Items}}
+  - path: patches/patch-{{ .Application }}-image.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: {{ .Application }}-dc
+      version: v1
+  - path: patches/patch-{{ .Application }}-env.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: {{ .Application }}-dc
+      version: v1
+  - path: patches/patch-{{ .Application }}-resources.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: {{ .Application }}-dc
+      version: v1
+  - path: patches/patch-{{ .Application }}-replicas.yaml
+    target:
+      group: apps.openshift.io
+      kind: DeploymentConfig
+      name: {{ .Application }}-dc
+      version: v1
+  {{end}}

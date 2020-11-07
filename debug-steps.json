@@ -1,0 +1,15 @@
+{
+  "project": "myportfolio",
+  "items":
+    [
+      {
+        "name":"mkdirs",
+        "skip": false
+      },
+      {
+        "name":"patches",
+        "skip": false
+      }
+
+    ]
+}
