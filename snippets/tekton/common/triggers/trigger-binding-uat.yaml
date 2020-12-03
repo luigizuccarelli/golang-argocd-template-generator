@@ -1,0 +1,26 @@
+apiVersion: triggers.tekton.dev/v1alpha1 
+kind: TriggerBinding 
+metadata:
+  name: trigger-binding-dev
+spec:
+  params: 
+  - name: repo-url
+    value: $(body.repository.url)
+  - name: repo-name
+    value: $(body.repository.name)
+  - name: repo-revision
+    value: $(body.repository.ref)
+  - name: repo-hash
+    value: $(body.repository.hash)
+  - name: actor-name
+    value: $(body.user)
+  - name: actor-email
+    value: $(body.email)
+  - name: message
+    value: $(body.message)
+  - name: sonar-url
+    value: $(body.sonar.url)
+  - name: argocd-repo-url
+    value: $(body.argocd.url)
+  - name: argocd-repo-name
+    value: $(body.argocd.name)

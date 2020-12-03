@@ -190,6 +190,3 @@ oc get deployment xyz -o yaml > current<app-name>/deployment.yaml
 
 The merge function will take what is in the folder (current) and iterate through each yaml file and merge it with the generated deploy.yaml
 
-
-
-

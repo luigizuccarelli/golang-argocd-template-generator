@@ -9,7 +9,7 @@ resources:
   - namespace/namespace.yaml
   - namespace/limit-range.yaml
   - namespace/resource-quota.yaml
-  - namespace/service-account-role-binding.yaml
+  
 
 patchesJson6902:
   # patches

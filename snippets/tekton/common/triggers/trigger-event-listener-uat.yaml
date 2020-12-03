@@ -1,0 +1,13 @@
+---
+apiVersion: triggers.tekton.dev/v1alpha1 
+kind: EventListener 
+metadata:
+  name: eventlistener-uat
+spec:
+  serviceAccountName: serviceaccount-uat
+  triggers:
+  - name: pipeline-trigger-uat
+    bindings: 
+      - ref: trigger-binding-uat
+    template: 
+      ref: trigger-template-uat

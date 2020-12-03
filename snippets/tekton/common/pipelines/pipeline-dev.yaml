@@ -1,0 +1,76 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pipeline-dev
+spec:
+  params:
+  - name: message
+    description: The message to print
+    default: This is the default message
+    type: string
+  - name: actor-name 
+    description: The actor
+    type: string
+  - name: actor-email 
+    description: The actors email
+    type: string
+  - name: repo-name 
+    description: The repo name
+    type: string
+  - name: repo-hash 
+    description: The repo commit hash
+    type: string
+  - name: uid 
+    description: The unique id
+    type: string
+  - name: sonar-login 
+    description: The sonar user
+    type: string
+  - name: sonar-pwd 
+    description: The sonar pwd
+    type: string
+  - name: sonar-url
+    description: The sonar url
+    type: string
+
+  resources:
+    - name: git-source
+      type: git
+    - name: build-image
+      type: image
+
+  workspaces:
+    - name: shared-workspace
+
+  tasks:
+  - name: golang-all-dev
+    taskRef:
+      name: golang-all-dev
+    params:
+    - name: message
+      value: $(params.message)
+    - name: repo-name
+      value: $(params.repo-name)
+    - name: repo-hash
+      value: $(params.repo-hash)
+    - name: actor-name
+      value: $(params.actor-name)
+    - name: actor-email
+      value: $(params.actor-email)
+    - name: uid
+      value: $(params.uid)
+    - name: sonar-url
+      value: $(params.sonar-url)
+    - name: sonar-login
+      value: $(params.sonar-login)
+    - name: sonar-pwd
+      value: $(params.sonar-pwd)
+
+    resources:
+      inputs:
+      - name: $(params.repo-name)
+        resource: git-source
+    
+    workspaces:
+    - name: shared-workspace
+      workspace: shared-workspace

@@ -1,0 +1,13 @@
+---
+apiVersion: triggers.tekton.dev/v1alpha1 
+kind: EventListener 
+metadata:
+  name: eventlistener-prd
+spec:
+  serviceAccountName: serviceaccount-prd
+  triggers:
+  - name: pipeline-trigger-prd
+    bindings: 
+      - ref: trigger-binding-prd
+    template: 
+      ref: trigger-template-prd

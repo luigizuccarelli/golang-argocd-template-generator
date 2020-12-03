@@ -1,2 +1,4 @@
 resources:
-  - {{ .User }}-role-binding.yaml
+    - admin.yaml
+    - edit.yaml
+    - view.yaml

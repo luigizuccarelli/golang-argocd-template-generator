@@ -1,0 +1,94 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: trigger-template-dev
+spec:
+  params:
+  - name: repo-ref
+    description: The git revision
+    default: master
+  - name: repo-url
+    description: The git repository url
+  - name: repo-name
+    description: The repo name
+  - name: repo-hash
+    description: The repo commit-hash
+  - name: message
+    description: The message to print
+    default: This is the default message
+  - name: actor-name
+    description: The actor name
+  - name: actor-email
+    description: The actor email
+  - name: uid
+    descripiton: Unique id
+    default: Unique id
+  - name: sonar-url
+    descripiton: SonarQube url
+  - name: argocd-repo-url
+    descripiton: Argocd repo url
+  - name: argocd-repo-name
+    descripiton: Argocd repo name
+ 
+
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: ppr-
+    spec:
+      pipelineRef:
+        name: pipeline-prd
+      params:
+      - name: message
+        value: $(tt.params.message)
+      - name: repo-name
+        value: $(tt.params.repo-name)
+      - name: repo-ref
+        value: $(tt.params.repo-ref)
+      - name: repo-hash
+        value: $(tt.params.repo-hash)
+      - name: repo-url
+        value: $(tt.params.repo-url)
+      - name: actor-name
+        value: $(tt.params.actor-name)
+      - name: actor-email
+        value: $(tt.params.actor-email)
+      - name: uid
+        value: $(uid)
+      - name: sonar-url
+        value: $(tt.params.sonar-url)
+      - name: argocd-repo-url
+        value: $(tt.params.argocd-repo-url)
+      - name: argocd-repo-name
+        value: $(tt.params.argocd-repo-name)
+            
+      
+      resources:
+      - name: git-source
+        resourceSpec:
+          type: git
+          params:
+          - name: revision
+            value: $(tt.params.repo-ref)
+          - name: url
+            value: $(tt.params.repo-url)
+      - name: argocd-git-source
+        resourceSpec:
+          type: git
+          params:
+          - name: revision
+            value: master
+          - name: url
+            value: $(tt.params.argocd-repo-url)
+
+      - name: build-image
+        resourceSpec:
+          type: image
+          params:
+          - name: url
+            value: quay.io/14west/$(tt.params.repo-name):$(params.repo-hash)
+      workspaces:
+      - name: shared-workspace
+        persistentVolumeClaim:
+          claimName: pipeline-pvc-prd

@@ -1,0 +1,80 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: {{ .Project }}-pipeline-uat
+spec:
+  params:
+    - name: GIT_REVISION
+      type: string
+      description: The git repository revision to check out
+      default: HEAD
+    - name: GIT_URL
+      type: string
+      description: The git reposotiry to check out
+      default: {{ .Cicd }}
+  resources:
+    - name: git-infra-repo
+      type: git
+
+  workspaces:
+    - name: shared-workspace
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+        kind: ClusterTask 
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.GIT_URL)
+        - name: deleteExisting
+          value: "true"
+        - name: revision
+          value: $(params.GIT_REVISION)
+    - name: deploy
+      taskRef:
+        name: {{ .Project }}-promote-image
+        kind: Task
+      runAfter:
+        - fetch-repository
+      resources:
+        inputs:
+        - name: git-source
+          resource: git-infra-repo
+      params:
+      - name: FROM_IMAGE_PATCH_FILE
+        value: environments/overlays/dev/patches/patch-{{ .Project }}-image.yaml
+      - name: TO_IMAGE_PATCH_FILE
+        value: environments/overlays/uat/patches/patch-{{ .Project }}-image.yaml
+      - name: COMMIT_MESSAGE
+        value: "Promoting image from dev to uat"
+    - name: slack-notify
+      taskRef:
+        name: send-to-webhook-slack
+        kind: ClusterTask
+      runAfter:
+        - deploy
+      params:
+        - name: webhook-secret
+          value: {{ .Project }}-notify-slack-webhook-secret
+        - name: message
+          value: "{{ .Project }}-pipeline-uat pipeline completed for $(params.GIT_REVISION)"
+    - name: email-notify
+      taskRef:
+        name: sendmail
+        kind: ClusterTask
+      runAfter:
+        - deploy
+      params:
+        - name: server
+          value: {{ .Project }}-smtp-auth
+        - name: subject
+          value: "{{ .Project }}-pipeline-uat pipeline completed for $(params.GIT_REVISION)"
+        - name: body
+          value: "{{ .Project }}-pipeline-uat pipeline completed for $(params.GIT_REVISION)"
+        - name: sender
+          value: "{{ .SmtpSender }}"
+        - name: recipients
+          value: "{{ .SmtpRecipient }}"

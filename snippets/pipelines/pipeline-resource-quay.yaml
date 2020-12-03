@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: quay
+spec:
+  params:
+    - name: url
+      value: {{ .RegistryUrl }}-{{ .Project }}:latest
+  type: image

@@ -1,0 +1,25 @@
+namePrefix: {{ .Application }}-
+commonLabels:
+  app: {{ .Application }}
+resources:
+  - pipeline-sa.yaml
+  - pipeline-pvc.yaml
+  - pipeline-dev.yaml
+  - pipeline-resource-quay.yaml
+  - quay-secret.yaml
+  - trigger-binding-dev.yaml
+  - trigger-template-dev.yaml
+  - trigger-event-listener-dev.yaml
+  - trigger-route-dev.yaml
+  - pipeline-priv-role-binding.yaml
+  - pipeline-edit-role-binding.yaml
+  - pipeline-uat.yaml
+  - trigger-binding-uat.yaml
+  - trigger-template-uat.yaml
+  - trigger-event-listener-uat.yaml
+  - trigger-route-uat.yaml
+  - pipeline-prd.yaml
+  - trigger-binding-prd.yaml
+  - trigger-template-prd.yaml
+  - trigger-event-listener-prd.yaml
+  - trigger-route-prd.yaml

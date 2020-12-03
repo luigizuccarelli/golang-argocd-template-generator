@@ -1,0 +1,36 @@
+{
+  "organization":"lmzsoftware",
+  "project": "eventbus-grpc",
+  "namespace": "eventbus-grpc-dev",
+  "imagesecret": "bHVpZ2l6dWNjYXJlbGxpOnZmY05vZGVqczA2Kg==",
+  "items": 
+    [
+      {
+        "repo":"https://github.com/luigizuccarelli/golang-eventbus-grpc.git",
+        "application":"golang-eventbus-grpc-client",
+        "port":"7030",
+        "version":"v1.0.0",
+        "cpu":"100m",
+        "mem":"100M",
+        "replicas":"1"
+      },
+      {
+        "repo":"https://github.com/luigizuccarelli/golang-eventbus-grpc.git",
+        "application":"golang-eventbus-grpc-server",
+        "port":"9000",
+        "version":"v1.0.0",
+        "cpu":"100m",
+        "mem":"100M",
+        "replicas":"1"
+      },
+      {
+        "repo":"https://github.com/luigizuccarelli/golang-simple-gRPC",
+        "application":"golang-simple-grpc",
+        "port":"7020",
+        "version":"v1.0.0",
+        "cpu":"100m",
+        "mem":"100M",
+        "replicas":"1"
+      }
+    ]
+}

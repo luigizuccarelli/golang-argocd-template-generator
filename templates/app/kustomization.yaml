@@ -2,8 +2,6 @@ namePrefix:
 commonLabels:
   app: {{ .Application }}
 resources:
-  - image-pull-secret.yaml
-  - service-account.yaml
-  - deployment-config.yaml
+  - deployment.yaml
   - service.yaml
 
